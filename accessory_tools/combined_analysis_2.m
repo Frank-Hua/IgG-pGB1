@@ -3,6 +3,7 @@ This is for analyzing the protein G-IgG binding kinetics, a project in
     collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
 This is for combining individual output files and analyzing them together.
+This one has a threshold, as compared to just combined_analysis.m
 
 Check and adjust parameters that are marked with "frank".
 %}
