@@ -19,14 +19,16 @@ Check and adjust parameters that are marked with "frank".
 
 function single_flow_analysis
 
+%Add path.
+addpath([pwd '\utilities\']);
+
 %initial input
 %command_input function doesn't do much, but is good to have.
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
 
-
-%read smm files
+%read smm files and other image info
 %.smm file (turned into frame) provides intensity information of selected binding sites.
 fid = fopen(['film' fname '.smm'],'r');
 if ( fid == -1 )
@@ -42,8 +44,6 @@ data_scaler = fread( fid, 1, 'uint32' );
 framecycle = fread( fid, 1, 'float32' );
 headersize = 2+2+1+4+4+4;
 len = uint32( ( fileinfo.bytes - headersize ) * 1.0 / bpp / film_x / film_y );
-baseline = ones(len,1);
-situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
 
 frame = zeros(film_x,film_y,len,'uint16');
 for t=1:len
@@ -51,11 +51,10 @@ for t=1:len
 end
 fclose(fid);
 
-
 %perform drift correction
 %{
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
-    In such a case, use "_drift_corrected.txt" as "_raw.txt" and feed
+    In such a case, rename "_drift_corrected.txt" as "_raw.txt" and feed
     drift_correction_control function a mock "_mark.txt" file.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
@@ -85,11 +84,17 @@ if strcmp(answer2,'no')
     spot_number_per_frame(fname,m2);    
 end
 
+%choose the size of the frame and whether to transpose the frame 
+situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
+if isempty(situ)
+    situ=0;
+end
 
+baseline = ones(len,1);
 n = 0;
 
 %correct trace baseline
-answer3 = input('skip correcting trace baseline: [yes-(enter) or no-(no)] ','s');
+answer3 = input('skip correcting intensity baseline: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer3,'no')
     hdl = figure;
     temp = dlmread(['film' fname '_baseline_positions.txt']);
@@ -104,6 +109,9 @@ if strcmp(answer3,'no')
     end
 end
 
+mkdir('molecules');
+mkdir('intensities');
+mkdir('traces');
 
 answer4 = input('specify binding site finding parameter-circle radius in sr-pixels: [default=5] ');
 rad=num2str(answer4);
@@ -124,7 +132,7 @@ Analyzed binding site will be deleted from temp_good. That way we keep a
     record of what has been analyzed.
 %}
 fn = ['film' fname '_localizations_' x1 '_' x2 '_' y1 '_' y2 '_' rad '.txt'];
-if exist(fn)
+if exist(fn,'file')
     good=dlmread(fn);
     no_good=size(good,1);
 else
@@ -133,17 +141,13 @@ else
     else
         [good,no_good] = finding_localization_radius(m3,answer5,answer6,answer7,answer8,2000,answer4);
     end
-    [good,no_good] = redundant_binding_site(path,good,no_good);
+    [good,no_good] = redundant_binding_sites(path,good,no_good);
 end
 disp(['total number ' num2str(no_good)]);
 
 
 hdl2 = figure;
 hdl3 = figure;
-
-mkdir('molecules');
-mkdir('intensities');
-mkdir('traces');
 index = [];
 
 while n < no_good
@@ -166,6 +170,7 @@ while n < no_good
     end
 end
 
+index=sort(index,'ascend');
 if ~isempty(index)
     good(1:index(end),:) = [];
 end
@@ -240,7 +245,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\t%f\t%f\t%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);
@@ -264,7 +269,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);
@@ -288,7 +293,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);

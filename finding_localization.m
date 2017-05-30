@@ -65,8 +65,8 @@ for i = n1:n2
                     for k = 1:3
                         for l = 1:3
                             dum2 = reshape(g_peaks(k,l,:,:),7,7);
-                            dum3 = sum(abs(double(z)*dum2(:,:)-double(count(x-3:x+3,y-3:y+3))));
-                            diff(k,l) = sum(dum3);
+                            dum3 = sum(sum(abs(double(z)*dum2(:,:)-double(count(x-3:x+3,y-3:y+3)))));
+                            diff(k,l) = dum3;
                             if diff(k,l) < cur_best
                                 best_x = k;
                                 best_y = l;

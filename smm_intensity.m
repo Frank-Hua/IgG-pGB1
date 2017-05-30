@@ -20,17 +20,17 @@ switch situ
 %}
 
 intensity = zeros(len,1);
-s_avg_dist=flip_drift_correction(s_avg_dist,mod(situ,2));
+s_avg_dist = flip_drift_correction(s_avg_dist,mod(situ,2));
 s_avg_dist = round(s_avg_dist/180.0);
 
 %{
 center_xy is a floating number recording xy coordinate in the unit of nm.
 fxy_pos is a floating number recording xy coordinate in the unit of
-    diffration-limited pixel number.
+    diffration-limited (conventional) pixel number.
 xy_pos is an integer number recording xy coordinate in the unit of
-    diffration-limited pixel number.
+    diffration-limited (conventional) pixel number.
 %}
-[fx_pos,fy_pos]=STORM_xynm2conventional_xypixel(center_x,center_y,situ);
+[fx_pos,fy_pos] = STORM_xynm2conventional_xypixel(center_x,center_y,situ);
 x_pos = floor(fx_pos)+1;
 y_pos = floor(fy_pos)+1;
 
@@ -66,8 +66,7 @@ for t=1:len
     
     %avg_dist(t,i) is the drift correction at time t, with i=1 for x and i=2 for y.
     dum1 = double(frame(x_pos+s_avg_dist(t,1)-3:x_pos+s_avg_dist(t,1)+3,y_pos+s_avg_dist(t,2)-3:y_pos+s_avg_dist(t,2)+3,t)-background);
-    dum2 = sum(dum.*dum1);
-    intensity(t) = sum(dum2);
+    intensity(t) = sum(sum(dum.*dum1));
 end
 
 return;

@@ -20,7 +20,7 @@ switch situ
 %}
 
 img_size = 17; %frank
-s_avg_dist=flip_drift_correction(s_avg_dist,mod(situ,2));
+s_avg_dist = flip_drift_correction(s_avg_dist,mod(situ,2));
 s_avg_dist = round(s_avg_dist/180.0);
 
 %{
@@ -30,21 +30,20 @@ fxy_pos is a floating number recording xy coordinate in the unit of
 xy_pos is an integer number recording xy coordinate in the unit of
     diffration-limited pixel number.
 %}
-[fx_pos,fy_pos]=STORM_xynm2conventional_xypixel(center_x,center_y,situ);
+[fx_pos,fy_pos] = STORM_xynm2conventional_xypixel(center_x,center_y,situ);
 x_pos = floor(fx_pos)+1;
 y_pos = floor(fy_pos)+1;
-count=size(nonzeros(tr2),1);
 
+index=find(tr2);
+count=length(index);
 I = zeros(img_size,img_size,count,'uint16');
-count2 = 0;
-for t=1:len
-    if tr2(t) > 0
-        count2 = count2 + 1;
-        
-        %avg_dist(t,i) is the drift correction at time t, with i=1 for x and i=2 for y.
-        I(:,:,count2) = frame(x_pos+s_avg_dist(t,1)-(img_size-1)/2:x_pos+s_avg_dist(t,1)+(img_size-1)/2,y_pos+s_avg_dist(t,2)-(img_size-1)/2:y_pos+s_avg_dist(t,2)+(img_size-1)/2,t);
-    end
+
+for n=1:count
+    t=index(n);
+    %avg_dist(t,i) is the drift correction at frame t, with i=1 for x and i=2 for y.
+    I(:,:,n) = frame(x_pos+s_avg_dist(t,1)-(img_size-1)/2:x_pos+s_avg_dist(t,1)+(img_size-1)/2,y_pos+s_avg_dist(t,2)-(img_size-1)/2:y_pos+s_avg_dist(t,2)+(img_size-1)/2,t);
 end
+
 I = mat2gray(I);
 
 return;

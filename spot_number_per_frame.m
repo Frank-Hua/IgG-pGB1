@@ -12,15 +12,10 @@ maxi=max(m(:,5));
 count=zeros((maxi-mini+1),1);
 delete(['film' fname '_snpf.txt']);
 fid = fopen( ['film' fname '_snpf.txt'], 'a' );
-j=1;
+
 for i=mini:maxi
-    while m(j,5) == i
-        count(i-mini+1)=count(i-mini+1)+1;
-        j=j+1;
-        if j > size(m,1)
-            break
-        end
-    end
+    index=(m(:,5)==i);
+    count(i-mini+1)=sum(index);
     fprintf(fid,'%f\t%f\n',i,count(i-mini+1));
 end
 fclose(fid);

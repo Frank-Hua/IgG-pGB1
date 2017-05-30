@@ -2,7 +2,8 @@
 This is for analyzing the protein G-IgG binding kinetics, a project in
     collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-This is for combining individual output files and analyzing them together.
+This is for simulating trajectories. It assumes both binding and unbinding 
+events follow a Poisson process.
 
 Check and adjust parameters that are marked with "frank".
 %}

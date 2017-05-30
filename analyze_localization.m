@@ -5,7 +5,7 @@ This is for analyzing the protein G-IgG binding kinetics, a project in
 total records background intensity, KM, kon and koff of each binding site.
 intensity2 records intensities when protein G is bound to a binding site.
 tr records digital trace information.
-value determines if all the analyzed values above get accepted.
+value determines if the analyzed values above get accepted.
 
 For some reason, the pixel size for diffration-limited image is set as 180.0 nm.
 The "pixel size" for STORM image is 20.0 nm.
@@ -28,30 +28,20 @@ This is to find localization events within a certain radius of center_xy.
 
     flag stores the number of found localizations.
     local_xy stores the xy coordinate of found localizations.
-    frame_num stores the corresponding frame number in which each localziation
+    frame_num stores the frame number of a frame in which a localziation
         is detected.
 %}
-
-flag = 0;
-local = zeros(size(m,1),3);
-for j=1:size(m,1)
-    dist = sqrt((m(j,1)-center_x)^2+(m(j,2)-center_y)^2);
-    
-    %450 nm is the radius for display.
-    if dist <= 450 %frank
-        flag = flag+1;
-        local(flag,1) = m(j,1);
-        local(flag,2) = m(j,2);
-        local(flag,3) = m(j,5);
-    end
-end
-local_x = local(1:flag,1);
-local_y = local(1:flag,2);
-frame_num = local(1:flag,3);
+dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
+index=(dist <= 450);
+flag=sum(index);
 flag_num = num2str(flag);
+local_x = m(index,1);
+local_y = m(index,2);
+frame_num = m(index,5)+1;
 
-%times avoids unnecessarily repeating HMM fitting.
+%times avoids unnecessarily HMM fitting.
 %times = 0;
+
 answer = '';
 %70.0 nm is the radius for defining one binding site.
 rad = 70.0; %frank
@@ -75,13 +65,9 @@ while ~strcmp(answer,'done')
     %This is to find localization events from one binding site and generate tr.
     tr = zeros(len,1);
     tr2 = zeros(len,1);
-    for j=1:flag
-        dist = sqrt((local_x(j)-center_x)^2+(local_y(j)-center_y)^2);
-        if dist <= rad
-            tr_num = frame_num(j)+1;
-            tr(tr_num) = 1;
-        end
-    end
+    dist = sqrt((local_x-center_x).^2+(local_y-center_y).^2);
+    index=(dist <= rad);
+    tr(frame_num(index))=1;
     %{
     Fill up 2-frame gaps in tr that are caused by incomplete STROM
         localization detection.
@@ -109,18 +95,16 @@ while ~strcmp(answer,'done')
     c_intensity = (intensity-baseline(:,1))./baseline(:,1)*bsl;
     
     %Generate a circle around a binding site.
-    circle = zeros(181,2);
-    for k=1:181
-        circle(k,1) = rad*cos(2*k/180*pi)+center_x;
-        circle(k,2) = rad*sin(2*k/180*pi)+center_y;
-    end
+    circle = zeros(180,2);
+    circle(:,1) = rad*cos(2*(1:180)/180*pi)+center_x;
+    circle(:,2) = rad*sin(2*(1:180)/180*pi)+center_y;
     
     %Just plot segments of tr when protein G was bound.
     t_tr = imdilate(tr,strel('line',50,90));
     index = find(t_tr);
     
     %Generate indicator lines based on index.
-    [line_x,line_y]=line_gen(index);
+    [line_x,line_y]=line_generator(index);
     
     %figure starts%
     figure(hdl);
@@ -155,6 +139,7 @@ while ~strcmp(answer,'done')
     subplot(2,10,[18 20],'replace');
     plot(local_x,local_y,'+k',circle(:,1),circle(:,2));
     axis equal;
+    axis square;
     temp=axis;
     temp(1) = center_x-500; temp(2) = center_x+500; temp(3) = center_y-500; temp(4) = center_y+500;
     axis(temp);
@@ -211,13 +196,13 @@ while ~strcmp(answer,'done')
 
             flag2 stores the number of found localizations.
             local2 stores the xy coordinates of found localizations.
-            frame_num stores the corresponding frame number in which each localziation
+            frame_num stores the frame number of a frame in which a localziation
                 is detected.
         %}
         flag2 = 0;
         local2 = zeros(flag,2);
         for j=1:flag
-            if tr2(frame_num(j)+1)
+            if tr2(frame_num(j))
                 flag2 = flag2+1;
                 local2(flag2,1) = local_x(j);
                 local2(flag2,2) = local_y(j);
@@ -233,6 +218,7 @@ while ~strcmp(answer,'done')
         subplot(2,10,[18 20]);
         plot(local_x2,local_y2,'+k',circle(:,1),circle(:,2));
         axis equal;
+        axis square;
         temp=axis;
         temp(1) = center_x-500; temp(2) = center_x+500; temp(3) = center_y-500; temp(4) = center_y+500;
         axis(temp);

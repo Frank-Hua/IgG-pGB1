@@ -1,7 +1,11 @@
-%This is for analyzing the protein G-IgG binding kinetics, a project in
-%collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
-%The "_full" version is for finding localizations in the whole area.
-%Changable parameters are labeled with "frank".
+%{
+This is for analyzing the protein G-IgG binding kinetics, a project in
+    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+
+The "_full" version is for finding localizations in the entire imaging area.
+
+Check and adjust parameters that are marked with "frank".
+%}
 
 function finding_localization_full
 

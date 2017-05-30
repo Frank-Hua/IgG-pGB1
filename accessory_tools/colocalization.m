@@ -9,6 +9,8 @@ Check and adjust parameters that are marked with "frank".
 
 function colocalization
 
+%initial input
+%Get the directory and names of maps to be compared.
 path=command_input('input directory','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('index # of the reference filename ','3','s');
@@ -19,9 +21,12 @@ m2 = dlmread(['film' fname2 '_localizations.txt']);
 
 %m2(:,1) = m2(:,1)-167; %frank
 %m2(:,2) = m2(:,2)+13; %frank
+%Swap columns if the movie was flipped.
 temp2 = m2(:,1); %frank
 m2(:,1) = m2(:,2);
 m2(:,2) = temp2; %frank
+
+%Convert unit into nm.
 m1 = double(m1*20.0);
 m2 = double(m2*20.0);
 count0=size(m2,1);
@@ -94,6 +99,10 @@ end
 
 
 
+%{
+This function simply "tries" to calculate the offset between two sets of
+    coordinates.
+%}
 function [dist,dist_x,dist_y,avg_dist_x,avg_dist_y,count,threshold]=colocalization_core(m1,m2)
 
 dist = zeros(size(m2,1),1);

@@ -5,7 +5,7 @@ This is for analyzing the protein G-IgG binding kinetics, a project in
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [line_x,line_y]=line_gen(index)
+function [line_x,line_y]=line_generator(index)
 
 d_tr=conv(index,[1,-1],'same');
 d_tr(end)=1;

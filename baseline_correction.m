@@ -11,7 +11,7 @@ c_intensity = intensity;
 
 len = length(tr);
 
-%10 expands protein G binding peaks wider.
+%Use value 10 to expand protein G binding peaks wider.
 tr2 = ones(len,1)-imdilate(tr,strel('line',10,90)); %frank
 intensity2 = intensity.*tr2;
 

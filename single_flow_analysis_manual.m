@@ -16,14 +16,15 @@ Check and adjust parameters that are marked with "frank".
 
 function single_flow_analysis_manual
 
-%initial input
+%% initial input
 %command_input function doesn't do much, but is good to have.
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
+situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
 
 
-%read smm files
+%% read smm files
 %.smm file (turned into frame) provides intensity information of selected binding sites.
 fid = fopen(['film' fname '.smm'],'r');
 if ( fid == -1 )
@@ -40,7 +41,6 @@ framecycle = fread( fid, 1, 'float32' );
 headersize = 2+2+1+4+4+4;
 len = uint32( ( fileinfo.bytes - headersize ) * 1.0 / bpp / film_x / film_y );
 baseline = ones(len,1);
-situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
 
 frame = zeros(film_x,film_y,len,'uint16');
 for t=1:len
@@ -49,17 +49,17 @@ end
 fclose(fid);
 
 
-%perform drift correction
+%% perform drift correction
 %{
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
-    In such a case, use "_drift_corrected.txt" as "_raw.txt" and feed
-    drift_correction_control function a mock "_mark.txt" file.
+    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
+    feed drift_correction_control function with a mock "_marker.txt" file.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer,'no')
     m = dlmread(['film' fname '_raw.txt']);
     m(:,5) = uint16(m(:,5));
-    m0 = dlmread(['film' fname '_mark.txt']);
+    m0 = dlmread(['film' fname '_marker.txt']);
     m0(:,5) = uint16(m0(:,5));
     drift_correction_control(fname,m,m0);
 end
@@ -75,7 +75,7 @@ m3 = imread(['film' fname '_drift_corrected_histogram.tif'],'TIFF');
 m4 = dlmread(['film' fname '_drift.txt']);
 
 
-%plot spot number per frame
+%% plot spot number per frame
 %This can be used to calculate photobleaching rates.
 answer2 = input('skip calculating spot number per frame: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer2,'no')
@@ -108,7 +108,7 @@ while ~strcmp(answer,'exit')
     y_pos=floor(high_y/20.0)-76;
     %{
     6 and 148 set the boundary for spot finding. It avoids spots close to
-        edges.
+        the edges.
     2000 is the "intensity" threshold for spot finding.
     %}
     [good,no_good] = finding_localization(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76),6,148,6,148,2000); %frank
@@ -193,7 +193,7 @@ while ~strcmp(answer,'exit')
         end
     end
     
-    %Option 'c' is to zoom in to a binding site.
+    %Option 'k' is to zoom in to a binding site.
     if answer == 'k'
         [center_x,center_y]=ginput(1);
         %Convert center_xy into values in the unit of nm.
