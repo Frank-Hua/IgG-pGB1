@@ -18,6 +18,9 @@ function single_flow_analysis_manual
 
 %% initial input
 %command_input function doesn't do much, but is good to have.
+addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1');
+addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1\utilities');
+
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
@@ -82,7 +85,7 @@ if strcmp(answer2,'no')
     spot_number_per_frame(fname,m2);    
 end
 
-
+%% start manual selection and analysis
 mkdir('molecules');
 mkdir('intensities');
 mkdir('traces');
@@ -111,7 +114,7 @@ while ~strcmp(answer,'exit')
         the edges.
     2000 is the "intensity" threshold for spot finding.
     %}
-    [good,no_good] = finding_localization(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76),6,148,6,148,2000); %frank
+    [good,no_good] = finding_site(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76),6,148,6,148,2000); %frank
     
     %figure starts%
     figure(hdl);
@@ -120,7 +123,7 @@ while ~strcmp(answer,'exit')
     image(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76)');
     %colorbar;
     plot(good(:,1),good(:,2),'+b');
-    title(['number of localizations: ' num2str(no_good)]);
+    title(['number of binding sites: ' num2str(no_good)]);
     axis equal;
     temp=axis;
     temp(1) = -4;
@@ -186,7 +189,7 @@ while ~strcmp(answer,'exit')
         center_x=low_x+20.0*center_x;
         center_y=low_y+20.0*center_y;
         
-        t_baseline = baseline_localization(n,m2,center_x,center_y,frame,len,m4,hdl2,situ);
+        t_baseline = baseline_site(n,m2,center_x,center_y,frame,len,m4,hdl2,situ);
         baseline = [baseline t_baseline];
         if size(baseline,2) > 1
             baseline(:,1) = mean(baseline(:,2:end),2);
@@ -215,7 +218,7 @@ while ~strcmp(answer,'exit')
         %figure ends%
         
         if ~strcmp(answer,'no')
-            [total,intensity2,tr,value]=analyze_localization_manual(n,m2,center_x,center_y,frame,len,m4,baseline,hdl,situ);
+            [total,intensity2,tr,value]=analyze_site_manual(n,m2,center_x,center_y,frame,len,m4,baseline,hdl,situ);
             if value == -1
                 save_molecule(total,x_pos,y_pos,n);
                 save_intensity2(intensity2,x_pos,y_pos,n);
@@ -244,8 +247,8 @@ function display_menu
 disp('======================================================================');
 disp('& main menu options &');
 disp('to move the window: left-(a), right-(d), down-(s) or up-(w)');
-disp('to select a localization to correct trace baseline-(b)');
-disp('to select a localization to analyze-(k)');
+disp('to select a site to correct intensity baseline-(b)');
+disp('to select a site to analyze-(k)');
 disp('to stop analyzing-(exit)');
 
 return;

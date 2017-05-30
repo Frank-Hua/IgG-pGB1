@@ -2,23 +2,14 @@
 This is for analyzing the protein G-IgG binding kinetics, a project in
     collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
+r is the minimum separation between peaks.
+
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [good,no_good]=finding_localization(count,n1,n2,n3,n4,threshold)
+function [good,no_good]=finding_site_radius(count,n1,n2,n3,n4,threshold,r)
 
-circle=zeros(11,11);
-circle(:,1) = [ 0,0,0,0,0,0,0,0,0,0,0];
-circle(:,2) = [ 0,0,0,0,1,1,1,0,0,0,0];
-circle(:,3) = [ 0,0,0,1,0,0,0,1,0,0,0];
-circle(:,4) = [ 0,0,1,0,0,0,0,0,1,0,0];
-circle(:,5) = [ 0,1,0,0,0,0,0,0,0,1,0];
-circle(:,6) = [ 0,1,0,0,0,0,0,0,0,1,0];
-circle(:,7) = [ 0,1,0,0,0,0,0,0,0,1,0];
-circle(:,8) = [ 0,0,1,0,0,0,0,0,1,0,0];
-circle(:,9) = [ 0,0,0,1,0,0,0,1,0,0,0];
-circle(:,10) = [ 0,0,0,0,1,1,1,0,0,0,0];
-circle(:,11) = [ 0,0,0,0,0,0,0,0,0,0,0];
+circle = circle_generator(r);
 g_peaks = zeros(3,3,7,7);
 for k = 1:3
     for l = 1:3
@@ -50,10 +41,10 @@ for i = n1:n2
                 x = x+i;
                 y = y+j;
                 quality = 1;
-                for k = -5:5
-                    for l = -5:5
-                        if circle(k+6,l+6) > 0
-                            if count(x+k,y+l) > 0.45*z || sum_foob <= threshold %thresholds to select localizations
+                for k = -r:r
+                    for l = -r:r
+                        if circle(k+r+1,l+r+1) > 0
+                            if count(x+k,y+l) > 0.05*z || sum_foob <= threshold %thresholds to select localizations
                                 quality = 0;
                             end
                         end

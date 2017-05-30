@@ -13,7 +13,7 @@ The "pixel size" for STORM image is 20.0 nm.
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [total,intensity2,tr,value]=analyze_localization_manual(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,situ)
+function [total,intensity2,tr,value]=analyze_site_manual(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,situ)
 
 total=zeros(4,1);
 intensity2=0;
@@ -27,26 +27,14 @@ This is to find localization events within a certain radius of center_xy.
     frame_num stores the corresponding frame number in which each localziation
         is detected.
 %}
-flag = 0;
-local = zeros(size(m,1),3);
-for j=1:size(m,1)
-    dist = sqrt((m(j,1)-center_x)^2+(m(j,2)-center_y)^2);
-    
-    %450 nm is the radius for display.
-    if dist <= 450 %frank
-        flag = flag+1;
-        local(flag,1) = m(j,1);
-        local(flag,2) = m(j,2);
-        local(flag,3) = m(j,5);
-    end
-end
-local_x = local(1:flag,1);
-local_y = local(1:flag,2);
-frame_num = local(1:flag,3);
+dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
+index=(dist <= 450);
+flag=sum(index);
 flag_num = num2str(flag);
+local_x = m(index,1);
+local_y = m(index,2);
+frame_num = m(index,5)+1;
 
-%times avoids unnecessarily repeating HMM fitting.
-times = 0;
 answer = '';
 %70.0 nm is the radius for defining one binding site.
 rad = 70.0; %frank
@@ -70,13 +58,10 @@ while ~strcmp(answer,'done')
     %This is to find localization events from one binding site and generate tr.
     tr = zeros(len,1);
     tr2 = zeros(len,1);
-    for j=1:flag
-        dist = sqrt((local_x(j)-center_x)^2+(local_y(j)-center_y)^2);
-        if dist <= rad
-            tr_num = frame_num(j)+1;
-            tr(tr_num) = 1;
-        end
-    end
+    dist = sqrt((local_x-center_x).^2+(local_y-center_y).^2);
+    index=(dist <= rad);
+    tr(frame_num(index))=1;
+    
     %{
     Fill up 2-frame gaps in tr that are caused by incomplete STROM
         localization detection.
@@ -84,7 +69,10 @@ while ~strcmp(answer,'done')
     tr=imdilate(tr,strel('line',2,90));
     tr=imerode(tr,strel('line',2,90));
     
-    %clicktime2 and clicktime3 are used for correcting tr.
+    %{
+    clicktime2 and clicktime3 are used for correcting tr. And clicktime2 is
+        always overwritten by clicktime3.
+    %}
     if length(clicktime2)>=2
         for t=1:2:(length(clicktime2)-1)
             tr(floor(clicktime2(t)/timeunit):floor(clicktime2(t+1)/timeunit)) = 1;
@@ -102,11 +90,6 @@ while ~strcmp(answer,'done')
     %Correct intensity baseline.
     baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
     c_intensity = (intensity-baseline(:,1))./baseline(:,1)*bsl;
-    
-    %Send tr to HMM and get back idealized traces.
-    if times == 0
-        [id_tr states]=analyze_localization2vbFRET(c_intensity,center_x,center_y);
-    end
     
     %Generate a circle around a binding site.
     circle = zeros(181,2);
@@ -133,7 +116,6 @@ while ~strcmp(answer,'done')
     axis(temp);
     hold on;
     plot(time(1:floor(len/2)),0.25*temp(4)*tr(1:floor(len/2)),'r');
-    plot(time(1:floor(len/2)),0.25*temp(4)*id_tr(1:floor(len/2)),'k');
 
     subplot(3,10,[11 16],'replace');
     plot(time(floor(len/2)+1:len),c_intensity(floor(len/2)+1:len),'b');
@@ -147,7 +129,6 @@ while ~strcmp(answer,'done')
     axis(temp);
     hold on;
     plot(time(floor(len/2)+1:len),0.25*temp(4)*tr(floor(len/2)+1:len),'r');
-    plot(time(floor(len/2)+1:len),0.25*temp(4)*id_tr(floor(len/2)+1:len),'k');
 
     subplot(3,10,[21 26],'replace');
     plot(1:length(index),c_intensity(index),'b');
@@ -161,8 +142,8 @@ while ~strcmp(answer,'done')
     axis(temp);
     hold on;
     plot(1:length(index),0.25*temp(4)*tr(index),'r');
-    plot(1:length(index),0.25*temp(4)*id_tr(index),'k');
     
+    %Baseline is corrected, so (0,0) is plotted.
     subplot(3,10,17,'replace');
     plot(0,0,'bo');
     axis tight;
@@ -207,8 +188,6 @@ while ~strcmp(answer,'done')
         [X,Y] = ginput(1);
         center_x = X;
         center_y = Y;
-        %Since intensity could be changed, HMM fitting needs to be repeated.
-        times = -1;
     end
     
     %Option 'r' is to adjust the radius that defines a binding site.
@@ -252,7 +231,7 @@ while ~strcmp(answer,'done')
         flag2 = 0;
         local2 = zeros(flag,2);
         for j=1:flag
-            if tr2(frame_num(j)+1)
+            if tr2(frame_num(j))
                 flag2 = flag2+1;
                 local2(flag2,1) = local_x(j);
                 local2(flag2,2) = local_y(j);
@@ -352,8 +331,6 @@ while ~strcmp(answer,'done')
         value=-1;
         answer='done';
     end
-    
-    times = times+1;
 end
 
 return;

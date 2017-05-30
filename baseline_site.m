@@ -11,7 +11,7 @@ The "pixel size" for STORM image is 20.0 nm.
 Check and adjust parameters that are marked with "frank".
 %}
 
-function baseline = baseline_localization(n,m,center_x,center_y,frame,len,s_avg_dist,hdl,situ)
+function baseline = baseline_site(n,m,center_x,center_y,frame,len,s_avg_dist,hdl,situ)
 
 baseline = [];
 %{
