@@ -16,7 +16,6 @@ This version is for fast analysis of flow experiment data by
 Check and adjust parameters that are marked with "frank".
 %}
 
-
 function [total,intensity2,tr,value]=analyze_site(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
 
 total=zeros(4,1);
@@ -65,6 +64,7 @@ while ~strcmp(answer,'done')
     dist = sqrt((local_x-center_x).^2+(local_y-center_y).^2);
     index=(dist <= rad);
     tr(frame_num(index))=1;
+    
     %{
     Fill up 2-frame gaps in tr that are caused by incomplete STROM
         localization detection.
@@ -108,7 +108,6 @@ while ~strcmp(answer,'done')
     
     %figure starts%
     figure(hdl);
-    
     subplot(3,10,[1 6],'replace');
     plot(time(1:floor(len/2)),c_intensity(1:floor(len/2)),'b');
     temp=plot_formatter('time trace 1st half (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
@@ -212,7 +211,6 @@ while ~strcmp(answer,'done')
         
         %figure starts%
         figure(hdl);
-        
         subplot(2,10,[18 20]);
         plot(local_x2,local_y2,'+k',circle(:,1),circle(:,2));
         axis equal;
@@ -236,7 +234,6 @@ while ~strcmp(answer,'done')
     if answer=='p'
         %figure starts%
         figure(hdl);
-        
         subplot(3,10,[1 6]);
         plot(time(1:floor(len/2)),intensity(1:floor(len/2)),'k');
         plot_formatter('time trace 1st half (intensity+presence)',1,1,1,0,'off','off',0,max(c_intensity)*1.1);

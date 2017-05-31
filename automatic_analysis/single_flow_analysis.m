@@ -179,10 +179,10 @@ if ~isempty(index)
 end
 
 close('all');
+save_site(fn,good);
 combine_molecules;
 combine_intensities
 combine_traces;
-save_site(fn,good);
 
 end
 

@@ -294,12 +294,12 @@ end
 
 function combine_molecules
 
-cd('molecules');
 delete('molecules.txt');
+fid=fopen('molecules.txt', 'a');
+cd('molecules');
 files=dir;
 numberfiles=length(files);
 i=2;
-fid=fopen('molecules.txt', 'wt');
 while i < numberfiles,
     i=i+1;
     fid2=fopen(files(i).name,'r');
@@ -307,7 +307,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\t%f\t%f\t%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);
@@ -318,12 +318,12 @@ end
 
 function combine_intensities
 
-cd('intensities');
 delete('intensities.txt');
+fid=fopen('intensities.txt', 'a');
+cd('intensities');
 files=dir;
 numberfiles=length(files);
 i=2;
-fid=fopen('intensities.txt', 'wt');
 while i < numberfiles,
     i=i+1;
     fid2=fopen(files(i).name,'r');
@@ -331,7 +331,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);
@@ -342,12 +342,12 @@ end
 
 function combine_traces
 
-cd('traces');
 delete('traces.txt');
+fid=fopen('traces.txt', 'a');
+cd('traces');
 files=dir;
 numberfiles=length(files);
 i=2;
-fid=fopen('traces.txt', 'wt');
 while i < numberfiles,
     i=i+1;
     fid2=fopen(files(i).name,'r');
@@ -355,7 +355,7 @@ while i < numberfiles,
         a=zeros;
         a=dlmread(files(i).name);
         fprintf(fid, '%f\n', a);
-        fclose(fid2);      
+        fclose(fid2);
     end
 end
 fclose(fid);

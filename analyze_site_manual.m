@@ -93,10 +93,8 @@ while ~strcmp(answer,'done')
     
     %Generate a circle around a binding site.
     circle = zeros(181,2);
-    for k=1:181
-        circle(k,1) = rad*cos(2*k/180*pi)+center_x;
-        circle(k,2) = rad*sin(2*k/180*pi)+center_y;
-    end
+    circle(:,1) = rad*cos(2*(1:180)/180*pi)+center_x;
+    circle(:,2) = rad*sin(2*(1:180)/180*pi)+center_y;
     
     %Just plot segments of tr when protein G was bound.
     t_tr = imdilate(tr,strel('line',20,90));
@@ -206,8 +204,9 @@ while ~strcmp(answer,'done')
         %figure starts%
         subplot(2,10,[7 10]);
         text(1,1,['the distance is ' dist2_num ' nm'],'FontSize',11);
-        input('enter-to continue ','s');
         %figure ends%
+        
+        input('enter-to continue ','s');
     end
     
     %Option 'm' is to display the movie for a selected time window.
@@ -225,7 +224,7 @@ while ~strcmp(answer,'done')
 
             flag2 stores the number of found localizations.
             local2 stores the xy coordinates of found localizations.
-            frame_num stores the corresponding frame number in which each localziation
+            frame_num stores the corresponding frame number in which each localization
                 is detected.
         %}
         flag2 = 0;
