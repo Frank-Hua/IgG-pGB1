@@ -24,7 +24,7 @@ This is to find localization events within a certain radius of center_xy.
 
     flag stores the number of found localizations.
     local_xy stores the xy coordinate of found localizations.
-    frame_num stores the corresponding frame number in which each localziation
+    frame_num stores the corresponding frame number in which each localization
         is detected.
 %}
 dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);

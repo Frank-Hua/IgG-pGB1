@@ -17,7 +17,7 @@ Check and adjust parameters that are marked with "frank".
 %}
 
 
-function [total,intensity2,tr,value]=analyze_localization(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
+function [total,intensity2,tr,value]=analyze_site(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
 
 total=zeros(4,1);
 intensity2=0;
@@ -28,7 +28,7 @@ This is to find localization events within a certain radius of center_xy.
 
     flag stores the number of found localizations.
     local_xy stores the xy coordinate of found localizations.
-    frame_num stores the frame number of a frame in which a localziation
+    frame_num stores the frame number of a frame in which a localization
         is detected.
 %}
 dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
@@ -38,9 +38,6 @@ flag_num = num2str(flag);
 local_x = m(index,1);
 local_y = m(index,2);
 frame_num = m(index,5)+1;
-
-%times avoids unnecessarily HMM fitting.
-%times = 0;
 
 answer = '';
 %70.0 nm is the radius for defining one binding site.
@@ -75,7 +72,10 @@ while ~strcmp(answer,'done')
     tr=imdilate(tr,strel('line',2,90));
     tr=imerode(tr,strel('line',2,90));
     
-    %clicktime2 and clicktime3 are used for correcting tr.
+    %{
+    clicktime2 and clicktime3 are used for correcting tr. And clicktime2 is
+        always overwritten by clicktime3.
+    %}
     if length(clicktime2)>=2
         for t=1:2:(length(clicktime2)-1)
             tr(floor(clicktime2(t)/timeunit):floor(clicktime2(t+1)/timeunit)) = 1;
@@ -156,8 +156,6 @@ while ~strcmp(answer,'done')
         [X,Y] = ginput(1);
         center_x = X;
         center_y = Y;
-        %Since intensity could be changed, HMM fitting needs to be repeated.
-        %times = -1;
     end
     
     %Option 'r' is to adjust the radius that defines a binding site.
@@ -196,7 +194,7 @@ while ~strcmp(answer,'done')
 
             flag2 stores the number of found localizations.
             local2 stores the xy coordinates of found localizations.
-            frame_num stores the frame number of a frame in which a localziation
+            frame_num stores the frame number of a frame in which a localization
                 is detected.
         %}
         flag2 = 0;
@@ -257,20 +255,6 @@ while ~strcmp(answer,'done')
         input('enter-to continue ','s');
     end
     
-    %Option 'h' is to display the raw intensity and baseline.
-    if answer=='h'
-        %Send tr to HMM and get back idealized traces.
-        [id_tr states]=analyze_localization2vbFRET(c_intensity,center_x,center_y);
-
-        %figure starts%
-        subplot(3,10,[21 26]);
-        plot(1:length(index),0.5*max(c_intensity)*id_tr(index),'k');
-        plot_formatter('time trace (protein G-bound portion) (intensity+presence)',1,1,1,0,'off','off',0,max(c_intensity)*1.1);
-        %figure ends%
-
-        input('enter-to continue ','s');
-    end
-    
     %Option 'f' is to modify tr.
     if answer=='f'
         disp('left click to add frames');
@@ -316,7 +300,6 @@ while ~strcmp(answer,'done')
         answer='done';
     end
     
-    %times = times+1;
 end
 
 return;
@@ -334,7 +317,6 @@ disp('======================================================================');
 disp('& analysis menu options &');
 disp('center-(c), radius-(r), distance-(d), movie-(m)');
 disp('check the raw intensity and baseline-(p)');
-disp('use HMM to analyze intensity-(h)');
 disp('modifiy the time trace (presence)-(f), analyze-(q)');
 disp('navigate to a different binding site-(g)');
 disp('stop analyzing the current binding site-(done)');

@@ -158,7 +158,7 @@ while n < no_good
     %Convert good(n,:) into center_xy with values in the unit of nm.
     center_x = good(n,1)*20.0;
     center_y = good(n,2)*20.0;
-    [total,intensity2,tr,value]=analyze_localization(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
+    [total,intensity2,tr,value]=analyze_site(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
     if value == -1
         save_molecule(total,floor(good(n,1)),floor(good(n,2)),n);
         save_intensity2(intensity2,floor(good(n,1)),floor(good(n,2)),n);
@@ -177,6 +177,7 @@ index=sort(index,'ascend');
 if ~isempty(index)
     good(1:index(end),:) = [];
 end
+
 close('all');
 combine_molecules;
 combine_intensities
