@@ -19,16 +19,22 @@ Check and adjust parameters that are marked with "frank".
 
 function single_flow_analysis
 
-%Add path.
-addpath([pwd '\utilities\']);
-
-%initial input
+%% initial input
 %command_input function doesn't do much, but is good to have.
+addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1');
+addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1\utilities');
+
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
+%choose the size of the frame and whether to transpose the frame 
+situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
+if isempty(situ)
+    situ=0;
+end
 
-%read smm files and other image info
+
+%% read smm files and other image info
 %.smm file (turned into frame) provides intensity information of selected binding sites.
 fid = fopen(['film' fname '.smm'],'r');
 if ( fid == -1 )
@@ -44,6 +50,7 @@ data_scaler = fread( fid, 1, 'uint32' );
 framecycle = fread( fid, 1, 'float32' );
 headersize = 2+2+1+4+4+4;
 len = uint32( ( fileinfo.bytes - headersize ) * 1.0 / bpp / film_x / film_y );
+baseline = ones(len,1);
 
 frame = zeros(film_x,film_y,len,'uint16');
 for t=1:len
@@ -51,11 +58,12 @@ for t=1:len
 end
 fclose(fid);
 
-%perform drift correction
+
+%% perform drift correction
 %{
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
-    In such a case, rename "_drift_corrected.txt" as "_raw.txt" and feed
-    drift_correction_control function a mock "_mark.txt" file.
+    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
+    feed drift_correction_control function with a mock "_marker.txt" file.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer,'no')
@@ -77,23 +85,16 @@ m3 = imread(['film' fname '_drift_corrected_histogram.tif'],'TIFF');
 m4 = dlmread(['film' fname '_drift.txt']);
 
 
-%plot spot number per frame
+%% plot spot number per frame
 %This can be used to calculate photobleaching rates.
 answer2 = input('skip calculating spot number per frame: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer2,'no')
     spot_number_per_frame(fname,m2);    
 end
 
-%choose the size of the frame and whether to transpose the frame 
-situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
-if isempty(situ)
-    situ=0;
-end
 
-baseline = ones(len,1);
+%% correct trace baseline
 n = 0;
-
-%correct trace baseline
 answer3 = input('skip correcting intensity baseline: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer3,'no')
     hdl = figure;
@@ -101,7 +102,7 @@ if strcmp(answer3,'no')
     center_xb=temp(:,1);
     center_yb=temp(:,2);
     for i=1:length(center_xb)
-        t_baseline = baseline_localization(n,m2,center_xb(i),center_yb(i),frame,len,m4,hdl,situ);
+        t_baseline = baseline_site(n,m2,center_xb(i),center_yb(i),frame,len,m4,hdl,situ);
         baseline = [baseline t_baseline];
         if size(baseline,2) > 1
             baseline(:,1) = mean(baseline(:,2:end),2);
@@ -109,11 +110,13 @@ if strcmp(answer3,'no')
     end
 end
 
+
+%% start analysis
 mkdir('molecules');
 mkdir('intensities');
 mkdir('traces');
 
-answer4 = input('specify binding site finding parameter-circle radius in sr-pixels: [default=5] ');
+answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','5','');
 rad=num2str(answer4);
 
 %Boundaries are from 1 to 2295 super-resolution (sr)-pixels.
@@ -131,15 +134,15 @@ y2=num2str(answer8);
 Analyzed binding site will be deleted from temp_good. That way we keep a
     record of what has been analyzed.
 %}
-fn = ['film' fname '_localizations_' x1 '_' x2 '_' y1 '_' y2 '_' rad '.txt'];
+fn = ['film' fname '_sites_' x1 '_' x2 '_' y1 '_' y2 '_' rad '.txt'];
 if exist(fn,'file')
     good=dlmread(fn);
     no_good=size(good,1);
 else
-    if isempty(answer4)
-        [good,no_good] = finding_localization(m3,answer5,answer6,answer7,answer8,2000);
+    if strcmp(rad,'5')
+        [good,no_good] = finding_site(m3,answer5,answer6,answer7,answer8,2000);
     else
-        [good,no_good] = finding_localization_radius(m3,answer5,answer6,answer7,answer8,2000,answer4);
+        [good,no_good] = finding_site_radius(m3,answer5,answer6,answer7,answer8,2000,answer4);
     end
     [good,no_good] = redundant_binding_sites(path,good,no_good);
 end
@@ -178,7 +181,7 @@ close('all');
 combine_molecules;
 combine_intensities
 combine_traces;
-save_localization(fn,good);
+save_site(fn,good);
 
 end
 
@@ -188,7 +191,7 @@ end
 
 
 
-function save_localization(fn,good)
+function save_site(fn,good)
 
 good;
 delete(fn);

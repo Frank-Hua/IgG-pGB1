@@ -24,10 +24,14 @@ addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1\utilities');
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
+%choose the size of the frame and whether to transpose the frame 
 situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
+if isempty(situ)
+    situ=0;
+end
 
 
-%% read smm files
+%% read smm files and other image info
 %.smm file (turned into frame) provides intensity information of selected binding sites.
 fid = fopen(['film' fname '.smm'],'r');
 if ( fid == -1 )
@@ -85,7 +89,9 @@ if strcmp(answer2,'no')
     spot_number_per_frame(fname,m2);    
 end
 
+
 %% start manual selection and analysis
+n = 0;
 mkdir('molecules');
 mkdir('intensities');
 mkdir('traces');
@@ -93,7 +99,6 @@ mkdir('traces');
 answer = '';
 x = 8;
 y = 8;
-n = 0;
 hdl  = figure;
 hdl2 = figure;
 while ~strcmp(answer,'exit')
