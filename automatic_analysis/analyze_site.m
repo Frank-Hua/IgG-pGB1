@@ -92,7 +92,7 @@ while ~strcmp(answer,'done')
     
     %Correct intensity baseline.
     baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
-    c_intensity = (intensity-baseline(:,1))./baseline(:,1)*bsl;
+    c_intensity = intensity./baseline(:,1)*bsl;
     
     %Generate a circle around a binding site.
     circle = zeros(180,2);

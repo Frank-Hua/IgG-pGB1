@@ -60,8 +60,8 @@ end
 
 hdl = figure;
 drift_plot(hdl,avg_dist,'b','b');
-s_avg_dist(:,1)=smooth(avg_dist(:,1),101,'sgolay');
-s_avg_dist(:,2)=smooth(avg_dist(:,2),101,'sgolay');
+s_avg_dist(:,1)=smooth(avg_dist(:,1),21,'sgolay');
+s_avg_dist(:,2)=smooth(avg_dist(:,2),21,'sgolay');
 drift_plot(hdl,s_avg_dist,'k','k');
 input('enter-to continue ','s');
 close(hdl);
