@@ -61,6 +61,9 @@ fclose(fid);
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
     In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
     feed drift_correction_control function with a mock "_marker.txt" file.
+    And "_drift.txt" files need to be replaced by a correct one to account
+    for drift correction in calculating intensities.
+"_marker.txt" files must contain the first and last frames.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer,'no')

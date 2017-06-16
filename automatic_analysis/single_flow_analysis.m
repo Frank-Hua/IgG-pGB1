@@ -64,12 +64,15 @@ fclose(fid);
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
     In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
     feed drift_correction_control function with a mock "_marker.txt" file.
+    And "_drift.txt" files need to be replaced by a correct one to account
+    for drift correction in calculating intensities.
+"_marker.txt" files must contain the first and last frames.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer,'no')
     m = dlmread(['film' fname '_raw.txt']);
     m(:,5) = uint16(m(:,5));
-    m0 = dlmread(['film' fname '_mark.txt']);
+    m0 = dlmread(['film' fname '_marker.txt']);
     m0(:,5) = uint16(m0(:,5));
     drift_correction_control(fname,m,m0);
 end
