@@ -44,7 +44,7 @@ for i = n1:n2
                 for k = -r:r
                     for l = -r:r
                         if circle(k+r+1,l+r+1) > 0
-                            if count(x+k,y+l) > 0.05*z || sum_foob <= threshold %thresholds to select localizations
+                            if count(x+k,y+l) > 0.45*z || sum_foob <= threshold %thresholds to select localizations
                                 quality = 0;
                             end
                         end

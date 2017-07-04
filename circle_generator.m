@@ -11,7 +11,7 @@ circle = zeros(2*r+1,2*r+1);
 for i = 1:(2*r+1)
     for j = 1:(2*r+1)
         dist = sqrt((i-r-1)^2+(j-r-1)^2);
-        if round(dist) == r
+        if round(dist) == r-1
             circle(i,j)=1;
         end
     end

@@ -17,7 +17,7 @@ This version is for fast analysis of flow experiment data by
 Check and adjust parameters that are marked with "frank".
 %}
 
-function single_flow_analysis
+function single_flow_analysis_conventional
 
 %% initial input
 %command_input function doesn't do much, but is good to have.
