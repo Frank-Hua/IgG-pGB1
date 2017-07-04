@@ -5,10 +5,10 @@ This is for analyzing the protein G-IgG binding kinetics, a project in
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [good,no_good]=finding_site_conventional(count,n1,n2,n3,n4,threshold)
+function [good,no_good]=finding_site_conventional(m,n1,n2,n3,n4,threshold)
 
 r=5;
-[good,no_good]=finding_site_radius_conventional(count,n1,n2,n3,n4,threshold,r);
+[good,no_good]=finding_site_radius_conventional(m,n1,n2,n3,n4,threshold,r);
 
 return;
 end

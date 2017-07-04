@@ -40,7 +40,7 @@ frame_num = m(index,5)+1;
 
 answer = '';
 %70.0 nm is the radius for defining one binding site.
-rad = 70.0; %frank
+rad = 360.0; %frank
 rad_num = num2str(125.0/180.0*rad); %correction for pixel size
 
 %Frame number is used as timeunit.
@@ -111,21 +111,22 @@ while ~strcmp(answer,'done')
     subplot(3,10,[1 6],'replace');
     plot(time(1:floor(len/2)),c_intensity(1:floor(len/2)),'b');
     temp=plot_formatter('time trace 1st half (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-    plot(time(1:floor(len/2)),0.25*temp(4)*tr(1:floor(len/2)),'r');
+%     plot(time(1:floor(len/2)),0.25*temp(4)*tr(1:floor(len/2)),'r');
 
     subplot(3,10,[11 16],'replace');
     plot(time(floor(len/2)+1:len),c_intensity(floor(len/2)+1:len),'b');
     temp=plot_formatter('time trace 2nd half (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-    plot(time(floor(len/2)+1:len),0.25*temp(4)*tr(floor(len/2)+1:len),'r');
+%     plot(time(floor(len/2)+1:len),0.25*temp(4)*tr(floor(len/2)+1:len),'r');
 
     subplot(3,10,[21 26],'replace');
     plot(1:length(index),c_intensity(index),'b');
     temp=plot_formatter('time trace (protein G-bound portion) (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-    plot(1:length(index),0.25*temp(4)*tr(index),'r');
+%     plot(1:length(index),0.25*temp(4)*tr(index),'r');
     line(line_x,max(c_intensity)*1.1*line_y,'LineStyle','--');
     
+    %Baseline is corrected, so (0,bsl) is plotted.
     subplot(3,10,17,'replace');
-    plot(0,0,'bo');
+    plot(0,bsl,'bo');
     plot_formatter('',0,0,0,0,'off','off',0,max(c_intensity)*1.1);
     
     subplot(2,10,[8 10],'replace');

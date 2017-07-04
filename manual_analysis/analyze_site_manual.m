@@ -141,9 +141,9 @@ while ~strcmp(answer,'done')
     hold on;
     plot(1:length(index),0.25*temp(4)*tr(index),'r');
     
-    %Baseline is corrected, so (0,0) is plotted.
+    %Baseline is corrected, so (0,bsl) is plotted.
     subplot(3,10,17,'replace');
-    plot(0,0,'bo');
+    plot(0,bsl,'bo');
     axis tight;
     temp=axis;
     temp(3) = 0;

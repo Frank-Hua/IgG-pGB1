@@ -119,7 +119,7 @@ mkdir('molecules');
 mkdir('intensities');
 mkdir('traces');
 
-answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','5','');
+answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','18','');
 rad=num2str(answer4);
 
 %Boundaries are from 1 to 2295 super-resolution (sr)-pixels.
@@ -143,9 +143,9 @@ if exist(fn,'file')
     no_good=size(good,1);
 else
     if strcmp(rad,'5')
-        [good,no_good] = finding_site_conventional(m3,answer5,answer6,answer7,answer8,2000);
+        [good,no_good] = finding_site_conventional(m2,answer5,answer6,answer7,answer8,2000);
     else
-        [good,no_good] = finding_site_radius_conventional(m3,answer5,answer6,answer7,answer8,2000,answer4);
+        [good,no_good] = finding_site_radius_conventional(m2,answer5,answer6,answer7,answer8,2000,answer4);
     end
     [good,no_good] = redundant_binding_sites(path,good,no_good);
 end

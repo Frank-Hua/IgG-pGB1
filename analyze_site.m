@@ -124,8 +124,9 @@ while ~strcmp(answer,'done')
     plot(1:length(index),0.25*temp(4)*tr(index),'r');
     line(line_x,max(c_intensity)*1.1*line_y,'LineStyle','--');
     
+    %Baseline is corrected, so (0,bsl) is plotted.
     subplot(3,10,17,'replace');
-    plot(0,0,'bo');
+    plot(0,bsl,'bo');
     plot_formatter('',0,0,0,0,'off','off',0,max(c_intensity)*1.1);
     
     subplot(2,10,[8 10],'replace');
