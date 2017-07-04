@@ -143,9 +143,9 @@ if exist(fn,'file')
     no_good=size(good,1);
 else
     if strcmp(rad,'5')
-        [good,no_good] = finding_site(m3,answer5,answer6,answer7,answer8,2000);
+        [good,no_good] = finding_site_conventional(m3,answer5,answer6,answer7,answer8,2000);
     else
-        [good,no_good] = finding_site_radius(m3,answer5,answer6,answer7,answer8,2000,answer4);
+        [good,no_good] = finding_site_radius_conventional(m3,answer5,answer6,answer7,answer8,2000,answer4);
     end
     [good,no_good] = redundant_binding_sites(path,good,no_good);
 end
@@ -161,7 +161,7 @@ while n < no_good
     %Convert good(n,:) into center_xy with values in the unit of nm.
     center_x = good(n,1)*20.0;
     center_y = good(n,2)*20.0;
-    [total,intensity2,tr,value]=analyze_site(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
+    [total,intensity2,tr,value]=analyze_site_conventional(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
     if value == -1
         save_molecule(total,floor(good(n,1)),floor(good(n,2)),n);
         save_intensity2(intensity2,floor(good(n,1)),floor(good(n,2)),n);

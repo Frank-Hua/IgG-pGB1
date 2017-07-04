@@ -7,7 +7,7 @@ r is the minimum separation between peaks.
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [good,no_good]=finding_site_radius(count,n1,n2,n3,n4,threshold,r)
+function [good,no_good]=finding_site_radius_conventional(count,n1,n2,n3,n4,threshold,r)
 
 circle = circle_generator(r);
 g_peaks = zeros(3,3,7,7);
@@ -44,7 +44,7 @@ for i = n1:n2
                 for k = -r:r
                     for l = -r:r
                         if circle(k+r+1,l+r+1) > 0
-                            if count(x+k,y+l) > 0.05*z || sum_foob <= threshold %thresholds to select localizations
+                            if count(x+k,y+l) > 0.45*z || sum_foob <= threshold %thresholds to select localizations
                                 quality = 0;
                             end
                         end

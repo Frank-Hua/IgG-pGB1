@@ -16,7 +16,7 @@ This version is for fast analysis of flow experiment data by
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [total,intensity2,tr,value]=analyze_site(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
+function [total,intensity2,tr,value]=analyze_site_conventional(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
 
 total=zeros(4,1);
 intensity2=0;
