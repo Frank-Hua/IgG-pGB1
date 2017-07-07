@@ -4,7 +4,6 @@ This is for analyzing the protein G-IgG binding kinetics, a project in
 
 total records background intensity, KM, kon and koff of each binding site.
 intensity2 records intensities when protein G is bound to a binding site.
-tr records digital trace information.
 value determines if the analyzed values above get accepted.
 
 For some reason, the pixel size for diffration-limited image is set as 180.0 nm.
@@ -16,7 +15,7 @@ This version is for fast analysis of flow experiment data by
 Check and adjust parameters that are marked with "frank".
 %}
 
-function [total,intensity2,tr,value]=analyze_site_conventional(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
+function [total,intensity2,value]=analyze_site_conventional(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
 
 total=zeros(4,1);
 intensity2=0;
@@ -27,8 +26,6 @@ This is to find localization events within a certain radius of center_xy.
 
     flag stores the number of found localizations.
     local_xy stores the xy coordinate of found localizations.
-    frame_num stores the frame number of a frame in which a localization
-        is detected.
 %}
 dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
 index=(dist <= 450);
@@ -36,11 +33,10 @@ flag=sum(index);
 flag_num = num2str(flag);
 local_x = m(index,1);
 local_y = m(index,2);
-frame_num = m(index,5)+1;
 
 answer = '';
-%70.0 nm is the radius for defining one binding site.
-rad = 360.0; %frank
+%280.0 nm is the radius for defining one binding site.
+rad = 280.0; %frank
 rad_num = num2str(125.0/180.0*rad); %correction for pixel size
 
 %Frame number is used as timeunit.
@@ -48,6 +44,7 @@ timeunit = 1; %frank
 time = (1:len)*timeunit;
 clicktime2 = [];
 clicktime3 = [];
+thres = 10000;
 
 while ~strcmp(answer,'done')
     %smm_intensity function analyzes the intensity of a binding site.
@@ -58,12 +55,16 @@ while ~strcmp(answer,'done')
     bsl0 = mean(intensity(1:20));
     bsl  = f.b1;
     
-    %This is to find localization events from one binding site and generate tr.
-    tr = zeros(len,1);
-    tr2 = zeros(len,1);
-    dist = sqrt((local_x-center_x).^2+(local_y-center_y).^2);
-    index=(dist <= rad);
-    tr(frame_num(index))=1;
+    %Correct intensity baseline.
+    baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
+    c_intensity = intensity./baseline(:,1)*bsl;
+    
+    %This is to find frames with intensity above threshold.
+    f_intensity=ordfilt2(c_intensity,3,[1;1;1]);
+
+    tr=f_intensity>thres;
+    tr=tr*1.0;
+    tr=imerode(tr,strel('line',2,90));
     
     %{
     Fill up 2-frame gaps in tr that are caused by incomplete STROM
@@ -88,11 +89,7 @@ while ~strcmp(answer,'done')
     end
     
     %inCircle_num stores the number of localizations within a binding site.
-    inCircle_num = num2str(nnz(tr));
-    
-    %Correct intensity baseline.
-    baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
-    c_intensity = intensity./baseline(:,1)*bsl;
+    aboveThres_num = num2str(nnz(tr));
     
     %Generate a circle around a binding site.
     circle = zeros(180,2);
@@ -104,24 +101,29 @@ while ~strcmp(answer,'done')
     index = find(t_tr);
     
     %Generate indicator lines based on index.
-    [line_x,line_y]=line_generator(index);
+    if ~isempty(index)
+        [line_x,line_y]=line_generator(index);
+    else
+        line_x=[0;0];
+        line_y=[0;1];
+    end
     
     %figure starts%
     figure(hdl);
     subplot(3,10,[1 6],'replace');
     plot(time(1:floor(len/2)),c_intensity(1:floor(len/2)),'b');
     temp=plot_formatter('time trace 1st half (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-%     plot(time(1:floor(len/2)),0.25*temp(4)*tr(1:floor(len/2)),'r');
+    plot(time(1:floor(len/2)),0.25*temp(4)*tr(1:floor(len/2)),'r');
 
     subplot(3,10,[11 16],'replace');
     plot(time(floor(len/2)+1:len),c_intensity(floor(len/2)+1:len),'b');
     temp=plot_formatter('time trace 2nd half (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-%     plot(time(floor(len/2)+1:len),0.25*temp(4)*tr(floor(len/2)+1:len),'r');
+    plot(time(floor(len/2)+1:len),0.25*temp(4)*tr(floor(len/2)+1:len),'r');
 
     subplot(3,10,[21 26],'replace');
     plot(1:length(index),c_intensity(index),'b');
     temp=plot_formatter('time trace (protein G-bound portion) (intensity+presence)',1,1,1,1,'off','off',0,max(c_intensity)*1.1);
-%     plot(1:length(index),0.25*temp(4)*tr(index),'r');
+    plot(1:length(index),0.25*temp(4)*tr(index),'r');
     line(line_x,max(c_intensity)*1.1*line_y,'LineStyle','--');
     
     %Baseline is corrected, so (0,bsl) is plotted.
@@ -133,7 +135,7 @@ while ~strcmp(answer,'done')
     text(1,5,['text window of binding site ' num2str(n) ':'],'FontSize',15);
     text(1,4,['total number of localizations: ' flag_num],'FontSize',11);
     text(1,3,['the radius is ' rad_num ' nm'],'FontSize',11);
-    text(1,2,['number of localizations in the circle:' inCircle_num],'FontSize',11);
+    text(1,2,['number of detected frames:' aboveThres_num],'FontSize',11);
     plot_formatter('',0,0,0,0,0,10,0,6);
 
     subplot(2,10,[18 20],'replace');
@@ -147,7 +149,6 @@ while ~strcmp(answer,'done')
     
     X = [];
     Y = [];
-    clicktime = [];
     display_menu2;
     answer = input('option: ','s');
     
@@ -156,13 +157,6 @@ while ~strcmp(answer,'done')
         [X,Y] = ginput(1);
         center_x = X;
         center_y = Y;
-    end
-    
-    %Option 'r' is to adjust the radius that defines a binding site.
-    if answer=='r'
-        [X,Y] = ginput(1);
-        rad = sqrt((X-center_x)^2+(Y-center_y)^2);
-        rad_num = num2str(125.0/180.0*rad); %correction for pixel size
     end
     
     %Option 'd' is to calculate the distance between any two points.
@@ -179,56 +173,9 @@ while ~strcmp(answer,'done')
         input('enter-to continue ','s');
     end
     
-    %Option 'm' is to display the movie for a selected time window.
-    if answer=='m'
-        disp('left click on the top two figures');
-        disp('right click on the bottom figure');
-        
-        clicktime=mtr_modifier(index,len,clicktime);
-        for t=1:2:(length(clicktime)-1)
-            tr2(floor(clicktime(t)/timeunit):floor(clicktime(t+1)/timeunit)) = 1;
-        end
-        
-        %{
-        This is to find localization events within certain time windows.
-
-            flag2 stores the number of found localizations.
-            local2 stores the xy coordinates of found localizations.
-            frame_num stores the frame number of a frame in which a localization
-                is detected.
-        %}
-        flag2 = 0;
-        local2 = zeros(flag,2);
-        for j=1:flag
-            if tr2(frame_num(j))
-                flag2 = flag2+1;
-                local2(flag2,1) = local_x(j);
-                local2(flag2,2) = local_y(j);
-            end
-        end
-        local_x2 = local2(1:flag2,1);
-        local_y2 = local2(1:flag2,2);
-        flag2_num = num2str(flag2);
-        
-        %figure starts%
-        figure(hdl);
-        subplot(2,10,[18 20]);
-        plot(local_x2,local_y2,'+k',circle(:,1),circle(:,2));
-        axis equal;
-        axis square;
-        temp=axis;
-        temp(1) = center_x-500; temp(2) = center_x+500; temp(3) = center_y-500; temp(4) = center_y+500;
-        axis(temp);
-        
-        subplot(2,10,[8 10]);
-        text(1,1,['number of localizations in the time range:' flag2_num],'FontSize',11);
-        %figure ends%
-        
-        if ~isempty(clicktime)
-            I=display_movie(frame,tr2,len,center_x,center_y,s_avg_dist,situ);
-            implay(I);
-            input('enter-to continue ','s');
-        end
+    %Option 't' is to change intensity threshold.
+    if answer=='t'
+        [~,thres] = ginput(1);
     end
     
     %Option 'p' is to display the raw intensity and baseline.
@@ -313,7 +260,7 @@ function display_menu2
 
 disp('======================================================================');
 disp('& analysis menu options &');
-disp('center-(c), radius-(r), distance-(d), movie-(m)');
+disp('center-(c), distance-(d), threshold-(t)');
 disp('check the raw intensity and baseline-(p)');
 disp('modifiy the time trace (presence)-(f), analyze-(q)');
 disp('navigate to a different binding site-(g)');

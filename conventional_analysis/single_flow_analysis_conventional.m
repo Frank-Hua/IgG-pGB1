@@ -117,9 +117,8 @@ end
 %% start analysis
 mkdir('molecules');
 mkdir('intensities');
-mkdir('traces');
 
-answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','18','');
+answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','14','');
 rad=num2str(answer4);
 
 %Boundaries are from 1 to 2295 super-resolution (sr)-pixels.
@@ -142,7 +141,7 @@ if exist(fn,'file')
     good=dlmread(fn);
     no_good=size(good,1);
 else
-    if strcmp(rad,'5')
+    if strcmp(rad,'14')
         [good,no_good] = finding_site_conventional(m2,answer5,answer6,answer7,answer8,2000);
     else
         [good,no_good] = finding_site_radius_conventional(m2,answer5,answer6,answer7,answer8,2000,answer4);
@@ -161,11 +160,10 @@ while n < no_good
     %Convert good(n,:) into center_xy with values in the unit of nm.
     center_x = good(n,1)*20.0;
     center_y = good(n,2)*20.0;
-    [total,intensity2,tr,value]=analyze_site_conventional(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
+    [total,intensity2,value]=analyze_site_conventional(n,m2,center_x,center_y,frame,len,m4,baseline,hdl2,hdl3,situ);
     if value == -1
         save_molecule(total,floor(good(n,1)),floor(good(n,2)),n);
         save_intensity2(intensity2,floor(good(n,1)),floor(good(n,2)),n);
-        save_tr(tr,floor(good(n,1)),floor(good(n,2)),n);
         index = [index n];
     end
     if value == -2
@@ -185,7 +183,6 @@ close('all');
 save_site(fn,good);
 combine_molecules;
 combine_intensities
-combine_traces;
 
 end
 
@@ -226,17 +223,6 @@ cd('..');
 return;
 end
 
-function save_tr(tr,x_pos,y_pos,i)
-
-tr;
-cd('traces');
-fn=['trace_' num2str(x_pos) '-' num2str(y_pos) '-' num2str(i) '.txt'];
-save(fn,'tr','-ascii');
-cd('..');
-
-return;
-end
-
 function combine_molecules
 
 delete('molecules.txt');
@@ -266,30 +252,6 @@ function combine_intensities
 delete('intensities.txt');
 fid=fopen('intensities.txt', 'a');
 cd('intensities');
-files=dir;
-numberfiles=length(files);
-i=2;
-while i < numberfiles,
-    i=i+1;
-    fid2=fopen(files(i).name,'r');
-    if fid2>0
-        a=zeros;
-        a=dlmread(files(i).name);
-        fprintf(fid, '%f\n', a);
-        fclose(fid2);
-    end
-end
-fclose(fid);
-cd('..');
-
-return;
-end
-
-function combine_traces
-
-delete('traces.txt');
-fid=fopen('traces.txt', 'a');
-cd('traces');
 files=dir;
 numberfiles=length(files);
 i=2;
