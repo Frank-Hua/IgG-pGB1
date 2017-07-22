@@ -31,6 +31,9 @@ x = 1:5:floor(len/5)*5+1;
 xx = 1:floor(len/5)*5;
 baseline2 = pchip(x,baseline,xx)';
 
+% baseline2 = medfilt1(baseline2,51);
+baseline2 = smooth(baseline2,51);
+
 c_intensity(1:floor(len/5)*5) = intensity(1:floor(len/5)*5)./baseline2*bsl;
     
 end
