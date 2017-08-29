@@ -1,8 +1,7 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function [line_x,line_y]=line_generator(index)

@@ -1,17 +1,15 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-Output files are "molecule_", "intensity_" and "trace_".
+Output files are "molecule_xx-yy-#", "intensity_xx-yy-#" and "trace_xx-yy-#".
 
-    "molecule_" files record background intensity, KM, kon and koff.
-    "intensity_" files record intensities when protein G is bound.
-    "trace_" files record digital trace information.
+    "molecule_xx-yy-#" files record background intensity, KM, kon and koff.
+    "intensity_xx-yy-#" files record intensities when protein G is bound.
+    "trace_xx-yy-#" files record the digital trace.
 
-For some reason, the pixel size for diffration-limited image is set as 180.0 nm.
-The "pixel size" for STORM image is 20.0 nm.
+For some reason, the pixel size for diffration-limited image is set as 180.0 nm. And the "pixel size" for STORM image is 20.0 nm.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function single_flow_analysis_manual
@@ -24,7 +22,7 @@ addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1\utilities');
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
-%choose the size of the frame and whether to transpose the frame 
+%Choose the size of the frame and whether to transpose the frame.
 situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
 if isempty(situ)
     situ=0;
@@ -47,7 +45,6 @@ data_scaler = fread( fid, 1, 'uint32' );
 framecycle = fread( fid, 1, 'float32' );
 headersize = 2+2+1+4+4+4;
 len = uint32( ( fileinfo.bytes - headersize ) * 1.0 / bpp / film_x / film_y );
-baseline = ones(len,1);
 
 frame = zeros(film_x,film_y,len,'uint16');
 for t=1:len
@@ -59,10 +56,9 @@ fclose(fid);
 %% perform drift correction
 %{
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
-    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
-    feed drift_correction_control function with a mock "_marker.txt" file.
-    And "_drift.txt" files need to be replaced by a correct one to account
-    for drift correction in calculating intensities.
+    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and you can feed drift_correction_control function with a mock "_marker.txt" 
+    file. And "_drift.txt" files need to be generated separately.
+
 "_marker.txt" files must contain the first and last frames.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
@@ -75,8 +71,8 @@ if strcmp(answer,'no')
 end
 
 %{
-"_drift_corrected_histogram.tif" is basically a STORM image of all binding sites.
-    Its pixel number is 81=9*9 times of the diffration-limited image.
+"_drift_corrected_histogram.tif" is basically a STORM image of all binding sites. Its pixel size is 9 times smaller than that of a diffration-limited 
+    image.
 "_drift.txt" is a drift file. Drifts in x and y are recorded in the unit of nm.
 %}
 m2 = dlmread(['film' fname '_drift_corrected.txt']);
@@ -94,22 +90,31 @@ end
 
 
 %% start manual selection and analysis
-n = 0;
+baseline = ones(len,1);
+
 mkdir('molecules');
 mkdir('intensities');
 mkdir('traces');
 
-answer = '';
-x = 8;
-y = 8;
+answer3 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','5','');
+
+answer4 = command_input('specify binding site finding parameter-minimum localization event number:','100','');
+%For some reason, this value needs to be multiplied by 20.
+answer4 = answer4*20.0;
+
+n = 0;
 hdl  = figure;
 hdl2 = figure;
+hdl3 = figure;
+x = 8;
+y = 8;
+answer = '';
+
 while ~strcmp(answer,'exit')
-    %display localizations in the left window
+    %Display binding sites in the left window.
     %{
-    The whole image is divided in to 225=15*15 windows and each window is 
-        displayed individually. Each window has a size of 153 STORM pixels
-        or 17 diffraction-limited pixels.
+    The whole image is divided in to 225=15*15 windows and each window is displayed individually. Each window has a size of 153 STORM pixels or 17 
+        diffraction-limited pixels.
     %}
     low_x = x*3060;
     low_y = y*3060;
@@ -118,11 +123,9 @@ while ~strcmp(answer,'exit')
     x_pos=floor(high_x/20.0)-76;
     y_pos=floor(high_y/20.0)-76;
     %{
-    6 and 148 set the boundary for spot finding. It avoids spots close to
-        the edges.
-    2000 is the "intensity" threshold for spot finding.
+    6 and 148 set the boundary for spot finding. It avoids spots close to the edges.
     %}
-    [good,no_good] = finding_site(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76),6,148,6,148,2000); %frank
+    [good,no_good] = finding_site_radius(m3(x_pos-76:x_pos+76,y_pos-76:y_pos+76),6,148,6,148,answer4,answer3);
     
     %figure starts%
     figure(hdl);
@@ -197,7 +200,7 @@ while ~strcmp(answer,'exit')
         center_x=low_x+20.0*center_x;
         center_y=low_y+20.0*center_y;
         
-        t_baseline = baseline_site(n,m2,center_x,center_y,frame,len,m4,hdl2,situ);
+        t_baseline = baseline_site(n,m2,center_x,center_y,frame,len,m4,hdl3,situ);
         baseline = [baseline t_baseline];
         if size(baseline,2) > 1
             baseline(:,1) = mean(baseline(:,2:end),2);
@@ -226,7 +229,7 @@ while ~strcmp(answer,'exit')
         %figure ends%
         
         if ~strcmp(answer,'no')
-            [total,intensity2,tr,value]=analyze_site_manual(n,m2,center_x,center_y,frame,len,m4,baseline,hdl,situ);
+            [total,intensity2,tr,value]=analyze_site_manual(n,m2,center_x,center_y,frame,len,m4,baseline,hdl,hdl2,situ);
             if value == -1
                 save_molecule(total,x_pos,y_pos,n);
                 save_intensity2(intensity2,x_pos,y_pos,n);
@@ -241,6 +244,13 @@ close('all');
 combine_molecules;
 combine_intensities
 combine_traces;
+
+delete(['film' fname '_baseline.txt']);
+fid = fopen(['film' fname '_baseline.txt'], 'a' );
+for j=1:size(baseline(:,1),1)
+    fprintf(fid,'%f\n',baseline(j,1));
+end
+fclose(fid);
 
 end
 

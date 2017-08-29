@@ -1,19 +1,16 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
 total records background intensity, KM, kon and koff of each binding site.
 intensity2 records intensities when protein G is bound to a binding site.
-tr records digital trace information.
+tr records the digital trace of each binding site.
 value determines if the analyzed values above get accepted.
 
-For some reason, the pixel size for diffration-limited image is set as 180.0 nm.
-The "pixel size" for STORM image is 20.0 nm.
+For some reason, the pixel size for diffration-limited image is set as 180.0 nm. And the "pixel size" for STORM image is 20.0 nm.
 
-This version is for fast analysis of flow experiment data by
-    skipping manual binding site picking.
+This version is for fast analysis by skipping manual binding site picking.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function [total,intensity2,tr,value]=analyze_site(n,m,center_x,center_y,frame,len,s_avg_dist,baseline,hdl,hdl2,situ)
@@ -27,8 +24,7 @@ This is to find localization events within a certain radius of center_xy.
 
     flag stores the number of found localizations.
     local_xy stores the xy coordinate of found localizations.
-    frame_num stores the frame number of a frame in which a localization
-        is detected.
+    frame_num stores the frame number of a frame in which a localization is detected.
 %}
 dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
 index=(dist <= 450);
@@ -41,7 +37,7 @@ frame_num = m(index,5)+1;
 answer = '';
 %70.0 nm is the radius for defining one binding site.
 rad = 70.0; %frank
-rad_num = num2str(125.0/180.0*rad); %correction for pixel size
+rad_num = num2str(125.0/180.0*rad); %frank; correction for pixel size
 
 %Frame number is used as timeunit.
 timeunit = 1; %frank
@@ -54,9 +50,13 @@ while ~strcmp(answer,'done')
     intensity=smm_intensity(frame,len,center_x,center_y,s_avg_dist,situ);
     nbins = floor((max(intensity))/50);
     [counts,centers] = hist(intensity,nbins);
-    f = fit(centers.',counts.','gauss1');
     bsl0 = mean(intensity(1:20));
-    bsl  = f.b1;
+    try
+        f = fit(centers.',counts.','gauss1');
+        bsl  = f.b1;
+    catch
+        bsl = bsl0;
+    end
     
     %This is to find localization events from one binding site and generate tr.
     tr = zeros(len,1);
@@ -66,15 +66,13 @@ while ~strcmp(answer,'done')
     tr(frame_num(index))=1;
     
     %{
-    Fill up 2-frame gaps in tr that are caused by incomplete STROM
-        localization detection.
+    Fill up 2-frame gaps in tr that are caused by incomplete STROM localization detection.
     %}
     tr=imdilate(tr,strel('line',2,90));
     tr=imerode(tr,strel('line',2,90));
     
     %{
-    clicktime2 and clicktime3 are used for correcting tr. And clicktime2 is
-        always overwritten by clicktime3.
+    clicktime2 and clicktime3 are used for correcting tr. And clicktime2 is always overwritten by clicktime3.
     %}
     if length(clicktime2)>=2
         for t=1:2:(length(clicktime2)-1)
@@ -87,7 +85,7 @@ while ~strcmp(answer,'done')
         end
     end
     
-    %inCircle_num stores the number of localizations within a binding site.
+    %inCircle_num stores the number of localization events within a binding site.
     inCircle_num = num2str(nnz(tr));
     
     %Correct intensity baseline.
@@ -162,14 +160,14 @@ while ~strcmp(answer,'done')
     if answer=='r'
         [X,Y] = ginput(1);
         rad = sqrt((X-center_x)^2+(Y-center_y)^2);
-        rad_num = num2str(125.0/180.0*rad); %correction for pixel size
+        rad_num = num2str(125.0/180.0*rad); %frank; correction for pixel size
     end
     
     %Option 'd' is to calculate the distance between any two points.
     if answer=='d'
         [X,Y] = ginput(2);
         dist2 = sqrt((X(1)-X(2))^2+(Y(1)-Y(2))^2);
-        dist2_num = num2str(125.0/180.0*dist2); %correction for pixel size
+        dist2_num = num2str(125.0/180.0*dist2); %frank; correction for pixel size
         
         %figure starts%
         subplot(2,10,[8 10]);
@@ -194,8 +192,7 @@ while ~strcmp(answer,'done')
 
             flag2 stores the number of found localizations.
             local2 stores the xy coordinates of found localizations.
-            frame_num stores the frame number of a frame in which a localization
-                is detected.
+            frame_num stores the frame number of a frame in which a localization is detected.
         %}
         flag2 = 0;
         local2 = zeros(flag,2);
@@ -278,8 +275,8 @@ while ~strcmp(answer,'done')
         d_tr(len)=0;
         index=find(d_tr==1);
         total(1)=bsl-bsl0;
-        total(2)=1/nnz(tr); %frank KM = total(2)*len*conc
-        total(3)=size(index,1); %frank kon=total(3)/(len*exposure_time*conc)
+        total(2)=index(end)/nnz(tr); %frank KM = total(2)*conc
+        total(3)=size(index,1)/index(end); %frank kon=total(3)/(exposure_time*conc)
         total(4)=total(2)*total(3); %frank koff=total(4)/exposure_time
         
         value=-1;

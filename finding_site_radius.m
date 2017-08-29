@@ -1,10 +1,9 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
 r is the minimum separation between peaks.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function [good,no_good]=finding_site_radius(count,n1,n2,n3,n4,threshold,r)
@@ -44,7 +43,7 @@ for i = n1:n2
                 for k = -r:r
                     for l = -r:r
                         if circle(k+r+1,l+r+1) > 0
-                            if count(x+k,y+l) > 0.45*z || sum_foob <= threshold %thresholds to select localizations
+                            if count(x+k,y+l) > 0.45*z || sum_foob <= threshold %frank; thresholds to select binding sites
                                 quality = 0;
                             end
                         end

@@ -1,8 +1,7 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function drift_correction_control(fname,m,m0)
@@ -39,11 +38,8 @@ end
 
 function mo=drift_apply(mi,s_avg_dist)
 
-%mini = min(mi(:,5));
 j=1;
 while j <= size(mi,1)
-    %mi(j,1) = mi(j,1)-s_avg_dist(mi(j,5)-mini+1,1);
-    %mi(j,2) = mi(j,2)-s_avg_dist(mi(j,5)-mini+1,2);
     mi(j,1) = mi(j,1)-s_avg_dist(mi(j,5)+1,1);
     mi(j,2) = mi(j,2)-s_avg_dist(mi(j,5)+1,2);
     j = j+1;

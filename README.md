@@ -17,39 +17,39 @@ single_flow_analysis.m(1)
     end
 
     if site list does not exist
-        finding_site.m(5) or finding_site_radius.m(6)
-        redundant_binding_sites.m(7)
+        finding_site_radius.m(5)
+        redundant_binding_sites.m(6)
     end
 
     while not at the end of site list
-        analyze_site.m(8)
+        analyze_site.m(7)
     end
 
 drift_correction_control.m(2)
-    drift_correction.m(9)
+    drift_correction.m(8)
 
 baseline_site.m(4)
-    smm_intensity.m(10)
-    baseline_correction.m(11)
+    smm_intensity.m(9)
+    baseline_correction.m(10)
 
-smm_intensity.m(10)
-    flip_drift_correction.m(12)
-    STORM_xynm2conventional_xypixel.m(13)
+smm_intensity.m(9)
+    flip_drift_correction.m(11)
+    STORM_xynm2conventional_xypixel.m(12)
 
-finding_site_radius.m(6)
-    circle_generator(14)
+finding_site_radius.m(5)
+    circle_generator(13)
 
-analyze_site.m(8)
-    smm_intensity.m(10)
-    line_generator.m(15)
-    mtr_modifier.m(16)
-    display_movie.m(17)
-    tr_modifier.m(18)
+analyze_site.m(7)
+    smm_intensity.m(9)
+    line_generator.m(14)
+    mtr_modifier.m(15)
+    display_movie.m(16)
+    tr_modifier.m(17)
 
-display_movie.m(17)
-    flip_drift_correction.m(12)
-    STORM_xynm2conventional_xypixel.m(13)
+display_movie.m(16)
+    flip_drift_correction.m(11)
+    STORM_xynm2conventional_xypixel.m(12)
 
 ../utilities
-    command_input.m(19)
-    plot_formatter.m(20)
+    command_input.m(18)
+    plot_formatter.m(19)

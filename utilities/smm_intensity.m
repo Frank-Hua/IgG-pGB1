@@ -1,8 +1,7 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-Check and adjust parameters that are marked with "frank".
+Adjustable parameters are marked with "frank".
 %}
 
 function intensity=smm_intensity(frame,len,center_x,center_y,s_avg_dist,situ)
@@ -25,10 +24,8 @@ s_avg_dist = round(s_avg_dist/180.0);
 
 %{
 center_xy is a floating number recording xy coordinate in the unit of nm.
-fxy_pos is a floating number recording xy coordinate in the unit of
-    diffration-limited (conventional) pixel number.
-xy_pos is an integer number recording xy coordinate in the unit of
-    diffration-limited (conventional) pixel number.
+fxy_pos is a floating number recording xy coordinate in the unit of diffration-limited (conventional) pixel number.
+xy_pos is an integer number recording xy coordinate in the unit of diffration-limited (conventional) pixel number.
 %}
 [fx_pos,fy_pos] = STORM_xynm2conventional_xypixel(center_x,center_y,situ);
 x_pos = floor(fx_pos)+1;
