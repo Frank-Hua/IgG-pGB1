@@ -1,10 +1,11 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
 r is the minimum separation between peaks.
 
-Check and adjust parameters that are marked with "frank".
+This version is for conventional analysis.
+
+Adjustable parameters are marked with "frank".
 %}
 
 function [good,no_good]=finding_site_radius_conventional(m,n1,n2,n3,n4,threshold,r)

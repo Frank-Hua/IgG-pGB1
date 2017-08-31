@@ -1,20 +1,19 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
 
-Output files are "molecule_", "intensity_" and "trace_".
+Output files are "molecule_xx-yy-#", "intensity_xx-yy-#" and "trace_xx-yy-#".
 
-    "molecule_" files record background intensity, KM, kon and koff.
-    "intensity_" files record intensities when protein G is bound.
-    "trace_" files record digital trace information.
+    "molecule_xx-yy-#" files record background intensity, KM, kon and koff.
+    "intensity_xx-yy-#" files record intensities when protein G is bound.
+    "trace_xx-yy-#" files record the digital trace.
 
-For some reason, the pixel size for diffration-limited image is set as 180.0 nm.
-The "pixel size" for STORM image is 20.0 nm.
+For some reason, the pixel size for diffration-limited image is set as 180.0 nm. And the "pixel size" for STORM image is 20.0 nm.
 
-This version is for fast analysis of flow experiment data by
-    skipping manual binding site picking.
+This version is for fast analysis by skipping manual binding site picking.
 
-Check and adjust parameters that are marked with "frank".
+This version is for conventional analysis.
+
+Adjustable parameters are marked with "frank".
 %}
 
 function single_flow_analysis_conventional
@@ -27,7 +26,7 @@ addpath('D:\Hua\02documents\08MatLab scripts\protein G\IgG-pGB1\utilities');
 path=command_input('input directory:','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 fname = command_input('input file index #:','1','s');
-%choose the size of the frame and whether to transpose the frame 
+%Choose the size of the frame and whether to transpose the frame.
 situ = input('movie option: [(0)-256, (1)-flipped 256, (2)-512, (3)-flipped 512] ');
 if isempty(situ)
     situ=0;
@@ -50,7 +49,6 @@ data_scaler = fread( fid, 1, 'uint32' );
 framecycle = fread( fid, 1, 'float32' );
 headersize = 2+2+1+4+4+4;
 len = uint32( ( fileinfo.bytes - headersize ) * 1.0 / bpp / film_x / film_y );
-baseline = ones(len,1);
 
 frame = zeros(film_x,film_y,len,'uint16');
 for t=1:len
@@ -62,10 +60,9 @@ fclose(fid);
 %% perform drift correction
 %{
 "_drift_corrected.txt" files can be directly generated from IDL STORM codes.
-    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and 
-    feed drift_correction_control function with a mock "_marker.txt" file.
-    And "_drift.txt" files need to be replaced by a correct one to account
-    for drift correction in calculating intensities.
+    In such a case, "_drift_corrected.txt" is the same as "_raw.txt", and you can feed drift_correction_control function with a mock "_marker.txt" 
+    file. And "_drift.txt" files need to be generated separately.
+
 "_marker.txt" files must contain the first and last frames.
 %}
 answer = input('skip performing drift correction: [yes-(enter) or no-(no)] ','s');
@@ -78,8 +75,8 @@ if strcmp(answer,'no')
 end
 
 %{
-"_drift_corrected_histogram.tif" is basically a STORM image of all binding sites.
-    Its pixel number is 81=9*9 times of the diffration-limited image.
+"_drift_corrected_histogram.tif" is basically a STORM image of all binding sites. Its pixel size is 9 times smaller than that of a diffration-limited 
+    image.
 "_drift.txt" is a drift file. Drifts in x and y are recorded in the unit of nm.
 %}
 m2 = dlmread(['film' fname '_drift_corrected.txt']);
@@ -97,21 +94,29 @@ end
 
 
 %% correct trace baseline
-n = 0;
 answer3 = input('skip correcting intensity baseline: [yes-(enter) or no-(no)] ','s');
 if strcmp(answer3,'no')
-    hdl = figure;
     temp = dlmread(['film' fname '_baseline_positions.txt']);
     center_xb=temp(:,1);
     center_yb=temp(:,2);
+    hdl = figure;
+    baseline = ones(len,1);
     for i=1:length(center_xb)
-        t_baseline = baseline_site(n,m2,center_xb(i),center_yb(i),frame,len,m4,hdl,situ);
+        t_baseline = baseline_site(0,m2,center_xb(i),center_yb(i),frame,len,m4,hdl,situ);
         baseline = [baseline t_baseline];
         if size(baseline,2) > 1
             baseline(:,1) = mean(baseline(:,2:end),2);
         end
     end
+    delete(['film' fname '_baseline.txt']);
+    fid = fopen(['film' fname '_baseline.txt'], 'a' );
+    for j=1:size(baseline(:,1),1)
+        fprintf(fid,'%f\n',baseline(j,1));
+    end
+    fclose(fid);
 end
+
+baseline = dlmread(['film' fname '_baseline.txt']);
 
 
 %% start analysis
@@ -121,7 +126,7 @@ mkdir('intensities');
 answer4 = command_input('specify binding site finding parameter-circle radius in sr-pixels:','14','');
 rad=num2str(answer4);
 
-%Boundaries are from 1 to 2295 super-resolution (sr)-pixels.
+%Boundaries are between 1 to 2295 super-resolution (sr)-pixels.
 answer5 = command_input('specify binding site finding parameter-x lower boundary in sr-pixels:','206','');
 answer6 = command_input('specify binding site finding parameter-x upper boundary in sr-pixels:','2090','');
 answer7 = command_input('specify binding site finding parameter-y lower boundary in sr-pixels:','206','');
@@ -132,25 +137,25 @@ x2=num2str(answer6);
 y1=num2str(answer7);
 y2=num2str(answer8);
 
+answer9 = command_input('specify binding site finding parameter-minimum localization event number:','100','');
+%For some reason, this value needs to be multiplied by 20.
+answer9 = answer9*20.0;
+thres=num2str(answer9);
+
 %{
-Analyzed binding site will be deleted from temp_good. That way we keep a
-    record of what has been analyzed.
+Analyzed binding site will be deleted from good. That way we keep a record of what has been analyzed.
 %}
-fn = ['film' fname '_sites_' x1 '_' x2 '_' y1 '_' y2 '_' rad '.txt'];
+fn = ['film' fname '_sites_' x1 '_' x2 '_' y1 '_' y2 '_' rad '_' thres '.txt'];
 if exist(fn,'file')
     good=dlmread(fn);
     no_good=size(good,1);
 else
-    if strcmp(rad,'14')
-        [good,no_good] = finding_site_conventional(m2,answer5,answer6,answer7,answer8,2000);
-    else
-        [good,no_good] = finding_site_radius_conventional(m2,answer5,answer6,answer7,answer8,2000,answer4);
-    end
+    [good,no_good] = finding_site_radius(m3,answer5,answer6,answer7,answer8,answer9,answer4);
     [good,no_good] = redundant_binding_sites(path,good,no_good);
 end
 disp(['total number ' num2str(no_good)]);
 
-
+n = 0;
 hdl2 = figure;
 hdl3 = figure;
 index = [];
