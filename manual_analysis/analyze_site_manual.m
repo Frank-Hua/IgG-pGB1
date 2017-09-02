@@ -56,6 +56,10 @@ while ~strcmp(answer,'done')
         bsl = bsl0;
     end
     
+    %Correct intensity baseline.
+    baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
+    c_intensity = intensity./baseline(:,1)*bsl;
+    
     %This is to find localization events from one binding site and generate tr.
     tr = zeros(len,1);
     tr2 = zeros(len,1);
@@ -85,10 +89,6 @@ while ~strcmp(answer,'done')
     
     %inCircle_num stores the number of localization events within a binding site.
     inCircle_num = num2str(nnz(tr));
-    
-    %Correct intensity baseline.
-    baseline(:,1)=baseline(:,1)/mean(baseline(:,1))*bsl;
-    c_intensity = intensity./baseline(:,1)*bsl;
     
     %Generate a circle around a binding site.
     circle = zeros(180,2);
