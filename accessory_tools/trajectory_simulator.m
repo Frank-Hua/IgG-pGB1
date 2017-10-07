@@ -14,12 +14,12 @@ function protein_G_simulation
 path=command_input('input directory','C:\\Users\\frank\\Documents\\MATLAB','s');
 cd(path);
 
-ron=0.008; %frank
-roff=0.60; %frank
-tr_len=24000; %frank
+ron=0.0073; %frank
+roff=0.62; %frank
+tr_len=18000; %frank
 conc=10; %frank
 exposure_time=0.1; %frank
-num_mol=272; %frank
+num_mol=198; %frank
 num_trans=800; %frank
 
 interarr1=ceil(-10*log(rand(num_trans,num_mol))./ron); %frank

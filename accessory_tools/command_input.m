@@ -1,6 +1,7 @@
 %{
-This is for analyzing the protein G-IgG binding kinetics, a project in
-    collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+This is made for analyzing the kinetics data of protein G-IgG interaction, a project in collaboration with Prof. Wei Cheng in UMich, Ann Arbor.
+
+Adjustable parameters are marked with "frank".
 %}
 
 function value=command_input(title,default,format)
