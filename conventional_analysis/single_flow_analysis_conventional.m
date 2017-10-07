@@ -150,7 +150,7 @@ if exist(fn,'file')
     good=dlmread(fn);
     no_good=size(good,1);
 else
-    [good,no_good] = finding_site_radius(m3,answer5,answer6,answer7,answer8,answer9,answer4);
+    [good,no_good] = finding_site_radius_conventional(m2,answer5,answer6,answer7,answer8,answer9,answer4);
     [good,no_good] = redundant_binding_sites(path,good,no_good);
 end
 disp(['total number ' num2str(no_good)]);
