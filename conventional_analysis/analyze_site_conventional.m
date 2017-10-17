@@ -28,7 +28,7 @@ This is to find localization events within a certain radius of center_xy.
     local_xy stores the xy coordinate of found localizations.
 %}
 dist = sqrt((m(:,1)-center_x).^2+(m(:,2)-center_y).^2);
-index=(dist <= 450);
+index=(dist <= 1000);
 flag=sum(index);
 flag_num = num2str(flag);
 local_x = m(index,1);
