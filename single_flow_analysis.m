@@ -248,7 +248,7 @@ cd('molecules');
 files=dir;
 numberfiles=length(files);
 i=2;
-while i < numberfiles,
+while i < numberfiles
     i=i+1;
     fid2=fopen(files(i).name,'r');
     if fid2>0
@@ -272,7 +272,7 @@ cd('intensities');
 files=dir;
 numberfiles=length(files);
 i=2;
-while i < numberfiles,
+while i < numberfiles
     i=i+1;
     fid2=fopen(files(i).name,'r');
     if fid2>0
@@ -296,7 +296,7 @@ cd('traces');
 files=dir;
 numberfiles=length(files);
 i=2;
-while i < numberfiles,
+while i < numberfiles
     i=i+1;
     fid2=fopen(files(i).name,'r');
     if fid2>0
