@@ -14,13 +14,13 @@ Go through the folder to see if "_pydrift.txt" or "_drift file.txt" exists. "_py
     in the unit of conventional pixel.
 %}
 g_drift = 1;
-for i=1:nf,
+for i=1:nf
     if A(i).isdir == 0
         s=A(i).name;
-        if ~isempty(strfind(s, '_pydrift.txt'))
+        if contains(s, '_pydrift.txt')
             g_drift = 0;
             break;
-        elseif ~isempty(strfind(s, '_drift.txt'))
+        elseif contains(s, '_drift.txt')
             g_drift = -1;
             break;
         end
@@ -35,22 +35,23 @@ if g_drift == 1
     if mini ~= 0
         warning('marker does not start with frame 0');
     end
-    avg_dist = zeros((maxi-mini+1),2);
-
+    
+    temp_avg_dist=zeros(1,2);
+    frame=mini;
     for i=mini+1:maxi
         index=find(a==i);
         if ~isempty(index)
+            frame=[frame;i];
             dist1=m(index,1)-m(1,1);
             dist2=m(index,2)-m(1,2);
             dist=sqrt(dist1.^2+dist2.^2);
             [~,p]=min(dist);
-            avg_dist(i-mini+1,1)=dist1(p);
-            avg_dist(i-mini+1,2)=dist2(p);
-        else
-            avg_dist(i-mini+1,1)=avg_dist(i-mini,1);
-            avg_dist(i-mini+1,2)=avg_dist(i-mini,2);
+            temp_avg_dist(end+1,1)=dist1(p);
+            temp_avg_dist(end,2)=dist2(p);
         end
     end
+    avg_dist(:,1)=pchip(frame,temp_avg_dist(:,1),[mini:maxi]');
+    avg_dist(:,2)=pchip(frame,temp_avg_dist(:,2),[mini:maxi]');
 elseif g_drift == 0
     temp_avg_dist=dlmread(s);
     avg_dist(:,1)=180.0*temp_avg_dist(:,2);
